@@ -85,68 +85,51 @@ app.listen(port, () => {
 
 var x = [];
 var y = [];
+var diff = [];
 
 
-const gets1 = (request, response) => {
-    pool.query(
-        'SELECT * FROM sensordata1 ORDER BY serial_no ASC',
-        (error, results) => {
-            if (error) {
-                throw error
-            }
-            response.status(200).json(results.rows)
+// pool.query(
+//     'SELECT * FROM sensordata11 ORDER BY serial_no DESC LIMIT 50',
+//     (error, results) => {
+//         if (error) {
+//             throw error
+//         }
+//         var temp = results.rows;
 
-            var res = results.rows
+//         for (var i in temp) x.push((temp[i].imu1_roll) - (temp[0].imu1_roll))
+//         console.log(x[1])
 
-            for (var i in res) y.push((res[i].imu1_pitch) - (res[0].imu1_pitch))
-            console.log(y)
+//         pool.query(
+//             'SELECT * FROM sensordata31 ORDER BY serial_no DESC LIMIT 50',
+//             (error, results) => {
+//                 if (error) {
+//                     throw error
+//                 }
 
-            // var res1 = results.rows
-            // converter.json2csv(res1, (err, csv) => {
-            //     if (err) {
-            //         throw err
-            //     }
+//                 var temp = results.rows;
+//                 for (var i in temp) y.push((temp[i].imu3_roll) - (temp[0].imu3_roll))
+//                 console.log(y[1])
 
-            //     // print CSV string
-            //     fs.writeFileSync('sensor1.csv', csv)
-            // })
-        },
-    )
-}
+//                 diff = y.map(function (num, idx) {
+//                     return num - x[idx];
+//                 });
+//                 console.log(diff)
 
-const gets2 = (request, response) => {
-    pool.query(
-        'SELECT * FROM sensordata2 ORDER BY serial_no ASC',
-        (error, results) => {
-            if (error) {
-                throw error
-            }
-            response.status(200).json(results.rows)
+//                 const sum = diff.reduce((a, b) => a + b, 0);
+//                 const avg = (sum / diff.length) || 0;
 
-            var res2 = results.rows
-            //console.log(res2[0])
-            // var x = []
+//                 console.log(`The sum is: ${sum}. The average is: ${avg}.`);
+//             })
 
-            for (var i in res2) x.push((res2[i].imu2_pitch) - (res2[0].imu2_pitch))
-            //console.log(x)
+//     })
 
 
-            // converter.json2csv(res2, (err, csv) => {
-            //     if (err) {
-            //         throw err
-            //     }
 
-            //     // print CSV string
-            //     fs.writeFileSync('sensor2.csv', csv)
-            //})
-        },
-    )
-    return x;
-}
+
 
 const gets3 = (request, response) => {
     pool.query(
-        'SELECT * FROM sensordata3 ORDER BY serial_no ASC',
+        'SELECT * FROM sensordata31 ORDER BY serial_no DESC LIMIT 50',
         (error, results) => {
             if (error) {
                 throw error
@@ -174,44 +157,55 @@ const gets3 = (request, response) => {
     )
 }
 
-const getUserById = (request, response) => {
-    const id = parseInt(request.params.id)
 
-    pool.query(
-        'SELECT * FROM sensordata1 WHERE serial_no = $1',
-        [id],
-        (error, results) => {
-            if (error) {
-                throw error
-            }
-            response.status(200).json(results.rows)
-        },
-    )
-}
 
-//app.get('/s1', gets1)
-app.get('/s1', function (req, res) {
-    gets1
-});
-app.get('/s2', gets2)
 app.get('/s3', gets3)
-app.get('/users/:id', getUserById)
 
 app.get('/home', (req, res) =>
     res.render('speedo'),
 )
 
 
-
-var sum = 0;
-for (var i = 0; i < x.length; i++) {
-    sum += x[i]; //don't forget to add the base
-}
-
-var avg = sum / x.length;
-console.log('Average:' + avg)
-
 app.post('/home', function (req, res) {
-    res.send(JSON.stringify({ first: 165, second: 7, third: 11 }),);
-})
 
+    var avg;
+    pool.query(
+        'SELECT * FROM sensordata11 ORDER BY serial_no DESC LIMIT 50',
+        (error, results) => {
+            if (error) {
+                throw error
+            }
+            var temp = results.rows;
+
+            for (var i in temp) x.push((temp[i].imu1_roll) - (temp[0].imu1_roll))
+            console.log(x[1])
+
+            pool.query(
+                'SELECT * FROM sensordata31 ORDER BY serial_no DESC LIMIT 50',
+                (error, results) => {
+                    if (error) {
+                        throw error
+                    }
+
+                    var temp = results.rows;
+                    for (var i in temp) y.push((temp[i].imu3_roll) - (temp[0].imu3_roll))
+                    console.log(y[1])
+
+                    diff = y.map(function (num, idx) {
+                        return num - x[idx];
+                    });
+                    console.log(diff)
+
+                    const sum = diff.reduce((a, b) => a + b, 0);
+                    avg = (sum / diff.length) || 0;
+
+                    console.log(`The sum is: ${sum}. The average is: ${avg}.`);
+
+                })
+
+        })
+
+
+    console.log("average" + avg)
+    res.send(JSON.stringify({ first: '${avg}', second: 4, third: 16 }),);
+})
