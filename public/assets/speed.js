@@ -71,9 +71,9 @@ var opts1 = {
   },
   limitMax: 'false',
   percentColors: [
-    [0.17, "#ff0000"],
+    [0.17, "#008000"],
     [0.50, "#f9c802"],
-    [1, "#008000"],
+    [1, "#ff0000"],
   ],
   strokeColor: '#E0E0E0',
   generateGradient: false
@@ -102,9 +102,9 @@ var opts2 = {
   },
   limitMax: 'false',
   percentColors: [
-    [0.17, "#ff0000"],
+    [0.17, "#008000"],
     [0.50, "#f9c802"],
-    [1, "#008000"],
+    [1, "#ff0000"],
   ],
   strokeColor: '#E0E0E0',
   generateGradient: false
