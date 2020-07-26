@@ -18,6 +18,50 @@ const pool = new Pool({
 
 //const db = require('./queries')
 
+
+var sensorQuery1 = null;
+var sensorQuery2 = null;
+var sensorQuery3 = null;
+
+
+
+pool.query('SELECT * FROM sensordata1 ORDER BY serial_no ASC', (err, res1) => {
+    if (err) throw err
+    sensorQuery1 = res1;
+
+    pool.query('SELECT * FROM sensordata2 ORDER BY serial_no ASC', (err, res2) => {
+        if (err) throw err
+        sensorQuery2 = res2;
+
+        pool.query('SELECT * FROM sensordata2 ORDER BY serial_no ASC', (err, res3) => {
+            if (err) throw err
+            sensorQuery3 = res3;
+            myFun();
+            
+          
+          });
+       
+      
+      });
+   
+  
+  });
+
+
+function myFun(){
+    console.log("Sensor Query 1 :");
+    console.log(sensorQuery1);
+    console.log("Sensor Query 2 :");
+    console.log(sensorQuery2);
+    console.log("Sensor Query 3 :");
+    console.log(sensorQuery3);
+} 
+
+
+
+
+
+
 app.set('view engine', 'ejs');
 //app.use(express.static('./public'));
 app.use('/public', express.static(path.join(__dirname, 'public')));
