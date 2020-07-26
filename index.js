@@ -8,14 +8,14 @@ const fs = require('fs')
 
 const { Pool, Client } = require('pg')
 
-const pool = new Pool({
+const client = new Client({
     user: 'pgbowl',
     host: '180.151.15.18',
     database: 'bowling',
     password: 'pgsql@321#',
     port: 5432,
 })
-
+client.connect()
 //const db = require('./queries')
 
 app.set('view engine', 'ejs');
@@ -84,7 +84,7 @@ var diff = [];
 
 
 const gets3 = (request, response) => {
-    pool.query(
+    client.query(
         'SELECT * FROM sensordata31 ORDER BY serial_no DESC LIMIT 50',
         (error, results) => {
             if (error) {
@@ -123,9 +123,8 @@ app.get('/home', (req, res) =>
 
 
 app.post('/home', function (req, res) {
-
     var avg;
-    pool.query(
+    var Query = client.query(
         'SELECT * FROM sensordata11 ORDER BY serial_no DESC LIMIT 50',
         (error, results) => {
             if (error) {
@@ -135,8 +134,9 @@ app.post('/home', function (req, res) {
 
             for (var i in temp) x.push((temp[i].imu1_roll) - (temp[0].imu1_roll))
             console.log(x[1])
+            var scopedBody = null;
 
-            pool.query(
+            var Query1 = client.query(
                 'SELECT * FROM sensordata31 ORDER BY serial_no DESC LIMIT 50',
                 (error, results) => {
                     if (error) {
@@ -156,12 +156,35 @@ app.post('/home', function (req, res) {
                     avg = (sum / diff.length) || 0;
 
                     console.log(`The sum is: ${sum}. The average is: ${avg}.`);
+                    scopedBody = avg;
 
                 })
 
         })
 
+    console.log(Query)
+    res.send(JSON.stringify({ first: -3, second: 11, third: 5 }));
 
-    console.log("average" + avg)
-    res.send(JSON.stringify({ first: '${avg}', second: 4, third: 16 }),);
 })
+
+// let temp;
+// async function Query() {
+//     client
+//         .query('SELECT * FROM sensordata11 ORDER BY serial_no DESC LIMIT 50')
+//         .then(res => {
+//             temp = res.rows;
+//             console.log(temp[0])
+//         })
+//         .catch(e => console.error(e.stack))
+// }
+
+// Query().then(() => {
+//     console.log(temp);
+// })
+
+function Query() {
+    client.query('SELECT * FROM sensordata11 ORDER BY serial_no DESC LIMIT 50')
+}
+
+var temp = Query()
+console.log(temp)
