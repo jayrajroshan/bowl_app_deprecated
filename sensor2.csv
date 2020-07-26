@@ -1,0 +1,4 @@
+serial_no,sensor_id,imu2_pitch,imu2_roll,battery,reading_time
+2,RRS,1.03,0.75,34,Sat Jul 25 2020 11:28:34 GMT+0530 (India Standard Time)
+3,RRS,2.01,1.53,34,Sat Jul 25 2020 11:28:34 GMT+0530 (India Standard Time)
+4,RRS,3,2.27,34,Sat Jul 25 2020 11:28:34 GMT+0530 (India Standard Time)
