@@ -1,21 +1,38 @@
-$(document).ready(function () {
+var ws = new WebSocket('ws://localhost:3000');
 
-  var speed;
+ws.onopen = function () {
+  console.log('websocket is connected ...')
+  ws.send('connected')
+}
 
-  $.ajax({
-    type: 'POST',
-    url: '/home',
-    data: speed,
-    success: function (data) {
-      const obj = JSON.parse(data);
-      gauge.set(obj.first);
-      gauge1.set(obj.second);
-      gauge2.set(obj.third);
+ws.onmessage = (e) => {
+  console.log(e.data)
+  const obj = JSON.parse(e.data);
+  gauge.set(obj.first);
+  gauge1.set(obj.second);
+  gauge2.set(obj.third);
+}
 
 
-    }
-  });
-});
+
+// $(document).ready(function () {
+
+//   var speed;
+
+//   $.ajax({
+//     type: 'POST',
+//     url: '/home',
+//     data: speed,
+//     success: function (data) {
+//       const obj = JSON.parse(data);
+//       gauge.set(obj.first);
+//       gauge1.set(obj.second);
+//       gauge2.set(obj.third);
+//       console.log(data)
+
+//     }
+//   });
+// });
 
 var opts = {
   lines: 80, // smoother
