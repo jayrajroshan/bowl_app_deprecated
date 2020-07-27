@@ -7,6 +7,7 @@ const converter = require('json-2-csv')
 const fs = require('fs')
 
 const { Pool, Client } = require('pg')
+const { query } = require('express')
 
 const pool = new Pool({
     user: 'pgbowl',
@@ -24,7 +25,8 @@ var sensorQuery2 = null;
 var sensorQuery3 = null;
 
 
-
+function queryFunction(){
+    
 pool.query('SELECT * FROM sensordata1 ORDER BY serial_no ASC', (err, res1) => {
     if (err) throw err
     sensorQuery1 = res1;
@@ -46,6 +48,7 @@ pool.query('SELECT * FROM sensordata1 ORDER BY serial_no ASC', (err, res1) => {
    
   
   });
+}
 
 
 function myFun(){
@@ -59,7 +62,7 @@ function myFun(){
 
 
 
-
+setInterval(queryFunction, 4000);
 
 
 app.set('view engine', 'ejs');
