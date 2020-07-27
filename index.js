@@ -25,27 +25,29 @@ var sensorQuery3 = null;
 
 
 
-pool.query('SELECT * FROM sensordata1 ORDER BY serial_no ASC', (err, res1) => {
-    if (err) throw err
-    sensorQuery1 = res1;
-
-    pool.query('SELECT * FROM sensordata2 ORDER BY serial_no ASC', (err, res2) => {
+function queryFunction(){
+    pool.query('SELECT * FROM sensordata1 ORDER BY serial_no ASC', (err, res1) => {
         if (err) throw err
-        sensorQuery2 = res2;
-
-        pool.query('SELECT * FROM sensordata2 ORDER BY serial_no ASC', (err, res3) => {
+        sensorQuery1 = res1;
+    
+        pool.query('SELECT * FROM sensordata2 ORDER BY serial_no ASC', (err, res2) => {
             if (err) throw err
-            sensorQuery3 = res3;
-            myFun();
-            
+            sensorQuery2 = res2;
+    
+            pool.query('SELECT * FROM sensordata2 ORDER BY serial_no ASC', (err, res3) => {
+                if (err) throw err
+                sensorQuery3 = res3;
+                myFun();
+                
+              
+              });
+           
           
           });
        
       
       });
-   
-  
-  });
+}
 
 
 function myFun(){
@@ -57,7 +59,7 @@ function myFun(){
     console.log(sensorQuery3);
 } 
 
-
+setInterval(queryFunction, 3000);
 
 
 
