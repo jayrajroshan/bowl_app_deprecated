@@ -38,7 +38,7 @@ var broadcast = function () {
     // wss.clients is an array of all connected clients
     wsServer.clients.forEach(function each(client) {
         client.send(data);
-        console.log('Sent: ' + data);
+        //console.log('Sent: ' + data);
     });
 }
 setInterval(broadcast, 1000);
@@ -98,6 +98,8 @@ var sensorQuery1 = null;
 var sensorQuery2 = null;
 var sensorQuery3 = null;
 
+
+
 pool.query('SELECT * FROM sensordata11 ORDER BY serial_no DESC LIMIT 10', (err, res1) => {
     if (err) throw err
     sensorQuery1 = res1;
@@ -135,12 +137,15 @@ function myFun() {
     sensor1 = sensorQuery1.rows;
     for (var i in sensor1) x.push((sensor1[i].imu1_roll) - (sensor1[0].imu1_roll))
     for (var i in sensor1) pitch1.push((sensor1[i].imu1_pitch) - (sensor1[0].imu1_pitch))
+    // console.log(x[1])
 
-    // console.log(sensorQuery3.rows)
+
 
     sensor3 = sensorQuery3.rows;
     for (var i in sensor3) y.push((sensor3[i].imu3_roll) - (sensor3[0].imu3_roll))
     for (var i in sensor3) pitch3.push((sensor3[i].imu3_pitch) - (sensor3[0].imu3_pitch))
+
+    // console.log(y[1])
 
     diff = y.map(function (num, idx) {
         return num - x[idx];
@@ -151,7 +156,6 @@ function myFun() {
     });
     const sum1 = diff.reduce((a, b) => a + b, 0);
     avg1 = (sum1 / diff.length) || 0;
-
 
     const sum2 = pitch3.reduce((a, b) => a + b, 0);
     avg2 = (sum2 / pitch3.length) || 0;
@@ -177,6 +181,8 @@ function myFun() {
 
 setInterval(function () {
     myFun()
+    console.log(sensorQuery1.rows[0])
+    console.log(sensorQuery3.rows[0])
     // console.log(avg1)
     // console.log(avg21)
     // console.log(avg31)
