@@ -3,10 +3,10 @@ const bodyParser = require('body-parser')
 const app = express()
 const port = 3000
 const path = require('path')
-var ws = require('ws')
+const converter = require('json-2-csv')
+const fs = require('fs')
 
 const { Pool, Client } = require('pg')
-
 
 const pool = new Pool({
     user: 'pgbowl',
@@ -16,7 +16,6 @@ const pool = new Pool({
     port: 5432,
 })
 
-<<<<<<< HEAD
 //const db = require('./queries')
 
 
@@ -26,29 +25,27 @@ var sensorQuery3 = null;
 
 
 
-function queryFunction(){
-    pool.query('SELECT * FROM sensordata1 ORDER BY serial_no ASC', (err, res1) => {
+pool.query('SELECT * FROM sensordata1 ORDER BY serial_no ASC', (err, res1) => {
+    if (err) throw err
+    sensorQuery1 = res1;
+
+    pool.query('SELECT * FROM sensordata2 ORDER BY serial_no ASC', (err, res2) => {
         if (err) throw err
-        sensorQuery1 = res1;
-    
-        pool.query('SELECT * FROM sensordata2 ORDER BY serial_no ASC', (err, res2) => {
+        sensorQuery2 = res2;
+
+        pool.query('SELECT * FROM sensordata2 ORDER BY serial_no ASC', (err, res3) => {
             if (err) throw err
-            sensorQuery2 = res2;
-    
-            pool.query('SELECT * FROM sensordata2 ORDER BY serial_no ASC', (err, res3) => {
-                if (err) throw err
-                sensorQuery3 = res3;
-                myFun();
-                
-              
-              });
-           
+            sensorQuery3 = res3;
+            myFun();
+            
           
           });
        
       
       });
-}
+   
+  
+  });
 
 
 function myFun(){
@@ -60,13 +57,11 @@ function myFun(){
     console.log(sensorQuery3);
 } 
 
-setInterval(queryFunction, 3000);
 
 
 
 
-=======
->>>>>>> 67355d4531d546c06b2af945908b65436b55aa41
+
 app.set('view engine', 'ejs');
 //app.use(express.static('./public'));
 app.use('/public', express.static(path.join(__dirname, 'public')));
@@ -83,43 +78,75 @@ app.get('/', (request, response) => {
     response.json({ info: 'Node.js, Express, and Postgres API' })
 })
 
-
-var broadcast = function () {
-    var data = JSON.stringify({ "first": avg1, "second": avg21, "third": avg31 });
-    // wss.clients is an array of all connected clients
-    wsServer.clients.forEach(function each(client) {
-        client.send(data);
-        //console.log('Sent: ' + data);
-    });
-}
-setInterval(broadcast, 1000);
-
-
-const wsServer = new ws.Server({ noServer: true });
-// wsServer.on('connection', socket => {
-//     var data = JSON.stringify({ "first": avg1, "second": avg2, "third": avg3 });
-//     setInterval(function () {
-//         socket.send(data)
-//         console.log(data)
-//     }, 2000);
-
-// });
-
-
-const server = app.listen(port, () => {
+app.listen(port, () => {
     console.log(`App running on port ${port}.`)
 })
-server.on('upgrade', (request, socket, head) => {
-    wsServer.handleUpgrade(request, socket, head, socket => {
-        wsServer.emit('connection', socket, request);
-    });
-});
 
 
+var x = [];
+var y = [];
+
+
+const gets1 = (request, response) => {
+    pool.query(
+        'SELECT * FROM sensordata1 ORDER BY serial_no ASC',
+        (error, results) => {
+            if (error) {
+                throw error
+            }
+            response.status(200).json(results.rows)
+
+            var res = results.rows
+
+            for (var i in res) y.push((res[i].imu1_pitch) - (res[0].imu1_pitch))
+            console.log(y)
+
+            // var res1 = results.rows
+            // converter.json2csv(res1, (err, csv) => {
+            //     if (err) {
+            //         throw err
+            //     }
+
+            //     // print CSV string
+            //     fs.writeFileSync('sensor1.csv', csv)
+            // })
+        },
+    )
+}
+
+const gets2 = (request, response) => {
+    pool.query(
+        'SELECT * FROM sensordata2 ORDER BY serial_no ASC',
+        (error, results) => {
+            if (error) {
+                throw error
+            }
+            response.status(200).json(results.rows)
+
+            var res2 = results.rows
+            //console.log(res2[0])
+            // var x = []
+
+            for (var i in res2) x.push((res2[i].imu2_pitch) - (res2[0].imu2_pitch))
+            //console.log(x)
+
+
+            // converter.json2csv(res2, (err, csv) => {
+            //     if (err) {
+            //         throw err
+            //     }
+
+            //     // print CSV string
+            //     fs.writeFileSync('sensor2.csv', csv)
+            //})
+        },
+    )
+    return x;
+}
 
 const gets3 = (request, response) => {
     pool.query(
-        'SELECT * FROM sensordata31 ORDER BY serial_no DESC LIMIT 10',
+        'SELECT * FROM sensordata3 ORDER BY serial_no ASC',
         (error, results) => {
             if (error) {
                 throw error
@@ -132,110 +159,59 @@ const gets3 = (request, response) => {
 
             for (var i in res3) z.push((res3[i].imu3_pitch) - (res3[0].imu3_pitch))
             console.log(z)
+
+
+            // converter.json2csv(res3, (err, csv) => {
+            //     if (err) {
+            //         throw err
+            //     }
+
+            //     // print CSV string
+            //     fs.writeFileSync('sensor3.csv', csv)
+            // })
         },
 
     )
 }
 
+const getUserById = (request, response) => {
+    const id = parseInt(request.params.id)
 
+    pool.query(
+        'SELECT * FROM sensordata1 WHERE serial_no = $1',
+        [id],
+        (error, results) => {
+            if (error) {
+                throw error
+            }
+            response.status(200).json(results.rows)
+        },
+    )
+}
 
+//app.get('/s1', gets1)
+app.get('/s1', function (req, res) {
+    gets1
+});
+app.get('/s2', gets2)
 app.get('/s3', gets3)
+app.get('/users/:id', getUserById)
 
 app.get('/home', (req, res) =>
     res.render('speedo'),
 )
 
-var sensorQuery1 = null;
-var sensorQuery2 = null;
-var sensorQuery3 = null;
 
 
-
-pool.query('SELECT * FROM sensordata11 ORDER BY serial_no DESC LIMIT 10', (err, res1) => {
-    if (err) throw err
-    sensorQuery1 = res1;
-
-    pool.query('SELECT * FROM sensordata21 ORDER BY serial_no DESC LIMIT 10', (err, res2) => {
-        if (err) throw err
-        sensorQuery2 = res2;
-
-        pool.query('SELECT * FROM sensordata31 ORDER BY serial_no DESC LIMIT 10', (err, res3) => {
-            if (err) throw err
-            sensorQuery3 = res3;
-            myFun();
-
-
-        });
-
-
-    });
-
-
-});
-
-var x = [];
-var y = [];
-var pitch3 = [];
-var pitch1 = [];
-var diff = [];
-var avg1 = null;
-var avg2 = null;
-var avg21 = null;
-var avg3 = null;
-var avg31 = null;
-
-function myFun() {
-    sensor1 = sensorQuery1.rows;
-    for (var i in sensor1) x.push((sensor1[i].imu1_roll) - (sensor1[0].imu1_roll))
-    for (var i in sensor1) pitch1.push((sensor1[i].imu1_pitch) - (sensor1[0].imu1_pitch))
-    // console.log(x[1])
-
-
-
-    sensor3 = sensorQuery3.rows;
-    for (var i in sensor3) y.push((sensor3[i].imu3_roll) - (sensor3[0].imu3_roll))
-    for (var i in sensor3) pitch3.push((sensor3[i].imu3_pitch) - (sensor3[0].imu3_pitch))
-
-    // console.log(y[1])
-
-    diff = y.map(function (num, idx) {
-        return num - x[idx];
-    });
-
-    pitchChange = pitch3.map(function (num, idx) {
-        return num - pitch1[idx];
-    });
-    const sum1 = diff.reduce((a, b) => a + b, 0);
-    avg1 = (sum1 / diff.length) || 0;
-
-    const sum2 = pitch3.reduce((a, b) => a + b, 0);
-    avg2 = (sum2 / pitch3.length) || 0;
-    avg21 = Math.abs(avg2)
-
-    const sum3 = pitchChange.reduce((a, b) => a + b, 0);
-    avg3 = (sum3 / pitchChange.length) || 0;
-    avg31 = Math.abs(avg3)
-
-
+var sum = 0;
+for (var i = 0; i < x.length; i++) {
+    sum += x[i]; //don't forget to add the base
 }
 
-// app.post('/home', function (req, res) {
-//     myFun()
-//     console.log(avg1)
-//     console.log(avg2)
-//     console.log(avg3)
+var avg = sum / x.length;
+console.log('Average:' + avg)
 
-//      var data = JSON.stringify({ "first": avg1, "second": avg2, "third": avg3 });
-//      res.send(data);
+app.post('/home', function (req, res) {
+    res.send(JSON.stringify({ first: 165, second: 7, third: 11 }),);
+})
 
-// })
-
-setInterval(function () {
-    myFun()
-    console.log(sensorQuery1.rows[0])
-    console.log(sensorQuery3.rows[0])
-    // console.log(avg1)
-    // console.log(avg21)
-    // console.log(avg31)
-    //console.log(sensorQuery3.rows)
-}, 1000);
